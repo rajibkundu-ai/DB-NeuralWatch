@@ -3,7 +3,7 @@ import asyncio
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.routes import auth, metrics, ws
+from app.api.routes import auth, metrics, metadata, ws
 from app.core.config import get_settings
 from app.workers.collector import collector
 
@@ -22,6 +22,7 @@ app.add_middleware(
 
 app.include_router(auth.router)
 app.include_router(metrics.router)
+app.include_router(metadata.router)
 app.include_router(ws.router)
 
 
