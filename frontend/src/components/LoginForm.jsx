@@ -11,7 +11,9 @@ const LoginForm = ({ onSubmit, loading, error }) => {
 
   return (
     <div className="auth-card">
+      <p className="brand-pill">NextGenMas</p>
       <h2>Sign in</h2>
+      <p className="brand-intro">Access the NeuralWatch control room crafted by NextGenMas.</p>
       <form onSubmit={handleSubmit}>
         <label>
           Username
