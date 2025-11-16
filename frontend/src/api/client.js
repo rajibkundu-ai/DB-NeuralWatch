@@ -22,5 +22,6 @@ export const fetchLatestMetrics = () => api.get('/metrics/latest').then((res) =>
 export const fetchHistory = (hours = 24) => api.get('/metrics/history', { params: { hours } }).then((res) => res.data)
 export const fetchAlerts = () => api.get('/metrics/alerts').then((res) => res.data)
 export const fetchTrends = (hours = 24) => api.post('/metrics/trends', { hours }).then((res) => res.data)
+export const fetchConnectionInfo = () => api.get('/metadata/connection').then((res) => res.data)
 
 export default api

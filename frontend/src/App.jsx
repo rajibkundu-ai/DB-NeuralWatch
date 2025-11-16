@@ -6,7 +6,7 @@ import AlertsPanel from './components/AlertsPanel'
 import HistoryChart from './components/HistoryChart'
 import TrendsPanel from './components/TrendsPanel'
 import { useAuth } from './hooks/useAuth'
-import { fetchLatestMetrics, fetchHistory, fetchAlerts, fetchTrends } from './api/client'
+import { fetchLatestMetrics, fetchHistory, fetchAlerts, fetchTrends, fetchConnectionInfo } from './api/client'
 
 const App = () => {
   const { isAuthenticated, login, logout, loading, error } = useAuth()
@@ -15,6 +15,7 @@ const App = () => {
   const [alerts, setAlerts] = useState([])
   const [trends, setTrends] = useState([])
   const [range, setRange] = useState(24)
+  const [connectionInfo, setConnectionInfo] = useState(null)
 
   const loadAll = async () => {
     const [latest, historyData, alertsData, trendsData] = await Promise.all([
@@ -36,6 +37,22 @@ const App = () => {
     return () => clearInterval(interval)
   }, [isAuthenticated, range])
 
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setConnectionInfo(null)
+      return
+    }
+    const loadConnectionInfo = async () => {
+      try {
+        const info = await fetchConnectionInfo()
+        setConnectionInfo(info)
+      } catch (err) {
+        setConnectionInfo(null)
+      }
+    }
+    loadConnectionInfo()
+  }, [isAuthenticated])
+
   const filteredHistory = useMemo(() => history.slice(-120), [history])
 
   if (!isAuthenticated) {
@@ -48,7 +65,7 @@ const App = () => {
 
   return (
     <main className="app-shell">
-      <Header onLogout={logout} />
+      <Header onLogout={logout} connectionInfo={connectionInfo} />
       <section className="controls">
         <label>
           History range
