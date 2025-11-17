@@ -5,8 +5,18 @@ import MetricCards from './components/MetricCards'
 import AlertsPanel from './components/AlertsPanel'
 import HistoryChart from './components/HistoryChart'
 import TrendsPanel from './components/TrendsPanel'
+import RealtimePerformance from './components/RealtimePerformance'
+import AgMonitoringPanel from './components/AgMonitoringPanel'
+import StorageTrends from './components/StorageTrends'
 import { useAuth } from './hooks/useAuth'
-import { fetchLatestMetrics, fetchHistory, fetchAlerts, fetchTrends, fetchConnectionInfo } from './api/client'
+import {
+  fetchLatestMetrics,
+  fetchHistory,
+  fetchAlerts,
+  fetchTrends,
+  fetchConnectionInfo,
+  fetchInsights
+} from './api/client'
 
 const App = () => {
   const { isAuthenticated, login, logout, loading, error } = useAuth()
@@ -16,18 +26,26 @@ const App = () => {
   const [trends, setTrends] = useState([])
   const [range, setRange] = useState(24)
   const [connectionInfo, setConnectionInfo] = useState(null)
+  const [insights, setInsights] = useState(null)
 
   const loadAll = async () => {
-    const [latest, historyData, alertsData, trendsData] = await Promise.all([
-      fetchLatestMetrics(),
-      fetchHistory(range),
-      fetchAlerts(),
-      fetchTrends(range)
-    ])
-    setMetrics(latest)
-    setHistory(historyData)
-    setAlerts(alertsData)
-    setTrends(trendsData.points)
+    try {
+      const [latest, historyData, alertsData, trendsData, insightsData] = await Promise.all([
+        fetchLatestMetrics(),
+        fetchHistory(range),
+        fetchAlerts(),
+        fetchTrends(range),
+        fetchInsights().catch(() => null)
+      ])
+      setMetrics(latest)
+      setHistory(historyData)
+      setAlerts(alertsData)
+      setTrends(trendsData.points)
+      setInsights(insightsData)
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error('Failed to load dashboard data', err)
+    }
   }
 
   useEffect(() => {
@@ -78,9 +96,14 @@ const App = () => {
         </label>
       </section>
       <MetricCards metrics={metrics} />
+      <RealtimePerformance data={insights} />
       <div className="grid layout">
         <AlertsPanel alerts={alerts} />
         <HistoryChart data={filteredHistory} />
+      </div>
+      <div className="grid layout">
+        <AgMonitoringPanel replicas={insights?.ag} />
+        <StorageTrends data={insights?.storage} />
       </div>
       <TrendsPanel data={trends} />
     </main>
