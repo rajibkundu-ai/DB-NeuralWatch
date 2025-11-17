@@ -1,15 +1,33 @@
 import axios from 'axios'
 
-const configuredBaseUrl = import.meta.env.VITE_API_BASE_URL
+const buildApiBaseUrl = () => {
+  const envBaseUrl = import.meta.env.VITE_API_BASE_URL
+  const fallbackBaseUrl = `${window.location.origin}/api`
 
-if (!configuredBaseUrl) {
-  throw new Error('API base URL is not configured. Set VITE_API_BASE_URL in your frontend environment.')
+  const configuredBaseUrl = envBaseUrl && envBaseUrl.trim() !== ''
+    ? envBaseUrl
+    : fallbackBaseUrl
+
+  const normalizedBaseUrl = configuredBaseUrl.replace(/\/$/, '')
+  const apiBase = normalizedBaseUrl.endsWith('/api')
+    ? normalizedBaseUrl
+    : `${normalizedBaseUrl}/api`
+
+  const apiUrl = new URL(apiBase)
+  const pageProtocol = window.location.protocol
+
+  if (pageProtocol === 'https:' && apiUrl.protocol === 'http:' && apiUrl.hostname === window.location.hostname) {
+    apiUrl.protocol = 'https:'
+  }
+
+  if (apiUrl.hostname !== window.location.hostname) {
+    console.warn(`API base URL host ("${apiUrl.hostname}") differs from page host ("${window.location.hostname}").`)
+  }
+
+  return apiUrl.toString().replace(/\/$/, '')
 }
 
-const normalizedBaseUrl = configuredBaseUrl.replace(/\/$/, '')
-const apiBaseUrl = normalizedBaseUrl.endsWith('/api')
-  ? normalizedBaseUrl
-  : `${normalizedBaseUrl}/api`
+const apiBaseUrl = buildApiBaseUrl()
 
 const api = axios.create({
   baseURL: apiBaseUrl
