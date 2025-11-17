@@ -22,7 +22,8 @@ class Settings(BaseSettings):
     retention_hours: int = Field(24 * 14, description="Number of hours of metrics to retain in SQLite")
 
     backend_api_url: str = Field(
-        "http://localhost:8000", description="Public base URL for the backend API"
+        "http://localhost:8000/api",
+        description="Public base URL for the backend API (including the base path)",
     )
     cors_allowed_origins: list[str] = Field(
         default_factory=lambda: ["*"],

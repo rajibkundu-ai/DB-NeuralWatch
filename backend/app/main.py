@@ -21,10 +21,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(auth.router)
-app.include_router(metrics.router)
-app.include_router(metadata.router)
-app.include_router(ws.router)
+app.include_router(auth.router, prefix="/api")
+app.include_router(metrics.router, prefix="/api")
+app.include_router(metadata.router, prefix="/api")
+app.include_router(ws.router, prefix="/api")
 
 
 @app.on_event("startup")
