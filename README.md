@@ -73,6 +73,14 @@ docker-compose up --build
 
 The first run can take a few minutes because Docker needs to download images and install dependencies.
 
+### Deploying with Portainer
+
+If you deploy this stack through Portainer, Portainer expects any referenced `.env` file to live next to the stack definition. To avoid the `env file /data/compose/.../.env not found` error, do **not** rely on an external `.env` file in Portainer. Instead:
+
+1. In Portainer, go to **Stacks** → **Add stack**, paste the contents of `docker-compose.yml` into the editor, and click **Environment variables**.
+2. Add each variable from `.env.example` (e.g., `ADMIN_USERNAME`, `ADMIN_PASSWORD`, `SECRET_KEY`, `SQLSERVER_CONNECTION_STRING`, etc.) in the Environment variables table.
+3. Deploy the stack. The compose file now reads these values directly from the environment, so no `.env` file is required inside Portainer.
+
 ### 5. Open the apps
 
 - **Backend API** (useful for troubleshooting only): `http://localhost:8000/docs`
