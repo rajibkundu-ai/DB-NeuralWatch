@@ -28,6 +28,10 @@ class Settings(BaseSettings):
         default_factory=lambda: ["*"],
         description="Comma-separated list of origins allowed to access the API",
     )
+    cors_allow_credentials: bool = Field(
+        False,
+        description="Whether CORS requests are allowed to include user credentials",
+    )
 
     @field_validator("cors_allowed_origins", mode="before")
     @classmethod
