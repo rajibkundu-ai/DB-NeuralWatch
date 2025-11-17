@@ -16,7 +16,7 @@ cors_origins = settings.cors_allowed_origins or ["*"]
 app.add_middleware(
     CORSMiddleware,
     allow_origins=cors_origins,
-    allow_credentials=settings.cors_allow_credentials,
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -44,5 +44,4 @@ def read_root():
         "app": settings.app_name,
         "backend_api_url": settings.backend_api_url,
         "cors_allowed_origins": cors_origins,
-        "cors_allow_credentials": settings.cors_allow_credentials,
     }
