@@ -11,12 +11,13 @@ app = FastAPI(title="DB NeuralWatch", version="1.0.0")
 
 settings = get_settings()
 
+cors_origins = settings.cors_allowed_origins or ["*"]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=cors_origins,
     allow_credentials=True,
-    allow_methods=["*"]
-    ,
+    allow_methods=["*"],
     allow_headers=["*"],
 )
 
@@ -38,4 +39,9 @@ async def shutdown_event() -> None:
 
 @app.get("/")
 def read_root():
-    return {"message": "DB NeuralWatch API", "app": settings.app_name}
+    return {
+        "message": "DB NeuralWatch API",
+        "app": settings.app_name,
+        "backend_api_url": settings.backend_api_url,
+        "cors_allowed_origins": cors_origins,
+    }
