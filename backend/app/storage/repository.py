@@ -2,11 +2,12 @@ from __future__ import annotations
 
 from contextlib import contextmanager
 from datetime import datetime, timedelta
+from statistics import mean
 from typing import Iterable, List
 
 from sqlalchemy import func, select, delete
 
-from app.models.schemas import MetricSample, Alert, TrendPoint
+from app.models.schemas import MetricSample, Alert, TrendPoint, StorageTrendInsight
 from app.storage.database import SessionLocal, engine, Base
 from app.storage.models import MetricSampleDB, AlertDB
 from app.core.config import get_settings
@@ -97,3 +98,45 @@ def trend_data(hours: int, bucket_minutes: int = 60) -> List[TrendPoint]:
             TrendPoint(bucket=datetime.fromisoformat(row[0]), cpu_avg=row[1], memory_avg=row[2], disk_io_avg=row[3])
             for row in rows
         ]
+
+
+def storage_trend_summary(hours: int = 72) -> List[StorageTrendInsight]:
+    samples = get_metrics_since(hours)
+    if not samples:
+        return []
+    disk_values = [sample.disk_io for sample in samples]
+    memory_values = [sample.memory_percent for sample in samples]
+    disk_change = disk_values[-1] - disk_values[0]
+    memory_change = memory_values[-1] - memory_values[0]
+
+    def direction(value: float) -> str:
+        if value > 5:
+            return 'up'
+        if value < -5:
+            return 'down'
+        return 'flat'
+
+    insights = [
+        StorageTrendInsight(
+            label='Avg disk throughput',
+            value=round(mean(disk_values), 1),
+            unit='MB/s',
+            direction=direction(disk_change),
+            description='Rolling average throughput based on the selected window.',
+        ),
+        StorageTrendInsight(
+            label='Peak disk throughput',
+            value=round(max(disk_values), 1),
+            unit='MB/s',
+            direction='peak',
+            description='Highest sampled write/read throughput.',
+        ),
+        StorageTrendInsight(
+            label='Memory pressure drift',
+            value=round(memory_change, 1),
+            unit='pts',
+            direction=direction(memory_change),
+            description='Change in memory utilization between the first and latest samples.',
+        ),
+    ]
+    return insights
