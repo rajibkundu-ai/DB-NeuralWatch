@@ -1,6 +1,6 @@
 from functools import lru_cache
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from pydantic import Field
+from pydantic import Field, field_validator
 
 
 class Settings(BaseSettings):
@@ -20,6 +20,25 @@ class Settings(BaseSettings):
     alert_disk_io_threshold: float = Field(80.0)
 
     retention_hours: int = Field(24 * 14, description="Number of hours of metrics to retain in SQLite")
+
+    backend_api_url: str = Field(
+        "http://localhost:8000", description="Public base URL for the backend API"
+    )
+    cors_allowed_origins: list[str] = Field(
+        default_factory=lambda: ["*"],
+        description="Comma-separated list of origins allowed to access the API",
+    )
+    cors_allow_credentials: bool = Field(
+        False,
+        description="Whether CORS requests are allowed to include user credentials",
+    )
+
+    @field_validator("cors_allowed_origins", mode="before")
+    @classmethod
+    def split_origins(cls, value: str | list[str]):
+        if isinstance(value, str):
+            return [origin.strip() for origin in value.split(",") if origin.strip()]
+        return value
 
 
 @lru_cache
