@@ -1,7 +1,13 @@
 import axios from 'axios'
 
+const apiBaseUrl = import.meta.env.VITE_API_BASE_URL
+
+if (!apiBaseUrl) {
+  throw new Error('API base URL is not configured. Set VITE_API_BASE_URL in your frontend environment.')
+}
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
+  baseURL: apiBaseUrl
 })
 
 api.interceptors.request.use((config) => {
