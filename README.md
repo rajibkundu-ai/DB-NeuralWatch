@@ -132,6 +132,10 @@ RETENTION_HOURS=336
 VITE_API_BASE_URL=http://localhost:8000
 ```
 
+> ℹ️ The frontend reads `VITE_API_BASE_URL` at **build time**. Updating `.env.example` alone will not change a deployed bundle—copy
+> it to `frontend/.env` (or pass the variable during your CI/CD build) and rebuild the UI. If no value is provided, the dashboard
+> now falls back to `${window.location.origin}/api`, which prevents hard-coded IPs from lingering in production.
+
 ## API overview
 
 | Method | Endpoint              | Description                        |
